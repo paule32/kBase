@@ -1,0 +1,19 @@
+// -------------------------------------
+// Lohn & Gehalt v1.0 (c) 2013 J. Kallup
+//
+// Menüdatei
+// -------------------------------------
+parameter formObj
+
+class gehaltMENU(formObj, name) of menubar(formObj, name)
+
+    this.Datei = new Menu(this)
+    with (this.Datei)
+	text = "&Datei"
+    endwith
+
+    this.Hilfe = new Menu(this)
+    with (this.Hilfe)
+	text = "&Hilfe"
+    endwith
+endclass

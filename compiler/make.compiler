@@ -1,0 +1,65 @@
+INC	 = i:/Qt/4.8.2
+CC       = gcc -mwindows
+DEFINES  = -DUNICODE -DQT_LARGEFILE_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DQT_HAVE_MMX -DQT_HAVE_3DNOW -DQT_HAVE_SSE -DQT_HAVE_MMXEXT -DQT_HAVE_SSE2 -DQT_THREAD_SUPPORT -DQT_NEEDS_QMAIN
+INCLUDES = \
+	-I"$(INC)/include/Qt" \
+	-I"$(INC)/include/QtCore" \
+	-I"$(INC)/include/QtNetwork" \
+	-I"$(INC)/include/QtGui" \
+	-I"$(INC)/include/QtSql" \
+	-I"$(INC)/include/" \
+	-I"$(INC)/include/ActiveQt" \
+	-I"release"
+LIBSR   = \
+	-L. -lfl -ly -L"$(INC)/lib" -lmingw32 -lqtmain -lQtGui4 -lQtNetwork4 -lQtCore4 \
+	-lQAxContainerd -lQAxServer \
+	-lole32 -loleaut32 -luser32 -lgdi32 -ladvapi32 -luuid \
+	-lstdc++
+LIBSD   = \
+	-L. -lfl -ly -L"$(INC)/lib" -lmingw32 -lqtmain -lQtGuid4 -lQtNetworkd4 -lQtCored4 -lQAxContainerd -lstdc++
+
+LIBS	= $(LIBSR)
+
+all: start
+
+start:  lex.yy.c y.tab.c MyCompiler.o MySourceEdit.o MyDesigner.o MyProcess.o
+	moc.exe $(DEFINES) $(INCLUDES) -D__GNUC__ -DWIN32 -D__MOC_RUN__ MySourceEditor.h -o moc_mysourceeditor.cc
+	moc.exe $(DEFINES) $(INCLUDES) -D__GNUC__ -DWIN32 -D__MOC_RUN__ MyProcess.h -o moc_myprocess.cc
+	moc.exe $(DEFINES) $(INCLUDES) -D__GNUC__ -DWIN32 -D__MOC_RUN__ MyCompiler.h -o moc_mycompiler.cc
+	moc.exe $(DEFINES) $(INCLUDES) -D__GNUC__ -DWIN32 -D__MOC_RUN__ MyDesigner.h -o moc_mydesigner.cc
+	rcc.exe icons.qrc -o icons.cc
+	$(CC) $(DEFINES) $(INCLUDES) -o moc_mysourceeditor.o -c moc_mysourceeditor.cc
+	$(CC) $(DEFINES) $(INCLUDES) -o moc_mycompiler.o -c moc_mycompiler.cc
+	$(CC) $(DEFINES) $(INCLUDES) -o moc_mydesigner.o -c moc_mydesigner.cc
+	$(CC) $(DEFINES) $(INCLUDES) -o moc_myprocess.o -c moc_myprocess.cc
+	$(CC) $(DEFINES) $(INCLUDES) -o icons.o  -c icons.cc
+	$(CC) -o start lex.yy.c y.tab.c strlwr.c \
+	MyCompiler.o \
+	MyDesigner.o \
+	MySourceEdit.o \
+	MyProcess.o \
+	moc_myprocess.o \
+	moc_mysourceeditor.o \
+	moc_mydesigner.o \
+	moc_mycompiler.o \
+	icons.o \
+	$(LIBS) 2> m1
+
+y.tab.c: lex.yy.c pcode.y
+	bison -d -y pcode.y -o y.tab.c
+
+lex.yy.c: pcode.l
+	flex -i pcode.l
+
+
+MyCompiler.o: MyCompiler.cc MyCompiler.h
+	$(CC) $(DEFINES) $(INCLUDES) -o MyCompiler.o -c MyCompiler.cc 2> M1
+
+MyDesigner.o: MyDesigner.cc MyDesigner.h
+	$(CC) $(DEFINES) $(INCLUDES) -o MyDesigner.o -c MyDesigner.cc 2> M1
+
+MySourceEdit.o: MySourceedit.cc MySourceEditor.h
+	$(CC) $(DEFINES) $(INCLUDES) -o MySourceEdit.o -c MySourceEdit.cc
+
+MyProcess.o: MyProcess.cc MyProcess.h
+	$(CC) $(DEFINES) $(INCLUDES) -o MyProcess.o -c MyProcess.cc
